@@ -1,5 +1,5 @@
 {
-  "name": "kr/notification-service-bundle",
+  "name": "starternh/notification-service-bundle",
   "description": "Test description",
   "require": {
     "php": "^7.4|8.*",
@@ -11,6 +11,6 @@
     "symfony/http-kernel": "5.*"
   },
   "autoload": {
-    "psr-4": { "KR\\NotificationServiceBundle\\": "" }
+    "psr-4": { "Starternh\\MyTestBundle\\": "" }
   }
 }
