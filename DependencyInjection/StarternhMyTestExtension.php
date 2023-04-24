@@ -21,13 +21,13 @@ class StarternhMyTestExtension extends Extension
     public function load(array $configs, ContainerBuilder $container)
     {
         $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
-        $loader->load('services.yml');
+        $loader->load('services.yaml');
 
         $processor = new Processor();
         $configuration = $this->getConfiguration($configs, $container);
         $config = $processor->processConfiguration($configuration, $configs);
 
-        $container->setParameter('kr_notification_service_bundle.config', $config);
+        $container->setParameter('starternh_my_test_bundle.config', $config);
     }
 
     /**

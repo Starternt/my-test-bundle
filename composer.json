@@ -1,5 +1,5 @@
 {
-  "name": "starternh/notification-service-bundle",
+  "name": "starternh/my-test-bundle",
   "description": "Test description",
   "require": {
     "php": "^7.4|8.*",
