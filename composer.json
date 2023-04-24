@@ -1,0 +1,16 @@
+{
+  "name": "kr/notification-service-bundle",
+  "description": "Test description",
+  "require": {
+    "php": "^7.4|8.*",
+    "doctrine/orm": "^2.5",
+    "symfony/http-foundation": "5.*",
+    "symfony/filesystem": "5.*",
+    "symfony/config": "5.*",
+    "symfony/dependency-injection": "5.*",
+    "symfony/http-kernel": "5.*"
+  },
+  "autoload": {
+    "psr-4": { "KR\\NotificationServiceBundle\\": "" }
+  }
+}

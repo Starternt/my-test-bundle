@@ -1,0 +1,6 @@
+services:
+  starternh.notification_service:
+    class: Starternh\MyTestBundle\Service\NotificationService
+    arguments: ['@doctrine.orm.entity_manager']
+
+
