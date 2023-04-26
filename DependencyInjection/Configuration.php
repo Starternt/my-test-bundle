@@ -12,13 +12,19 @@ class Configuration implements ConfigurationInterface
      */
     public function getConfigTreeBuilder()
     {
-        $treeBuilder = new TreeBuilder('my_test');
+        $treeBuilder = new TreeBuilder('starternh_my_test');
+
         $treeBuilder->getRootNode()
             ->children()
-            ->booleanNode('isDisplay')->defaultTrue()->end()
-            ->booleanNode('someBoolean')->defaultTrue()->end()
+                ->arrayNode('my_test')
+                    ->children()
+                        ->integerNode('base_url')->end()
+                        ->scalarNode('token')->end()
+                    ->end()
+                ->end()
             ->end()
         ;
+
         return $treeBuilder;
     }
 }
