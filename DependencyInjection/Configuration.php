@@ -12,16 +12,16 @@ class Configuration implements ConfigurationInterface
      */
     public function getConfigTreeBuilder()
     {
-        $treeBuilder = new TreeBuilder('starternh_notification_service');
+        $treeBuilder = new TreeBuilder('starternh_my_test');
 
         $treeBuilder->getRootNode()
             ->children()
-            ->arrayNode('twitter')
-            ->children()
-            ->integerNode('client_id')->end()
-            ->scalarNode('client_secret')->end()
-            ->end()
-            ->end() // twitter
+                ->arrayNode('my_test')
+                    ->children()
+                        ->integerNode('base_url')->end()
+                        ->scalarNode('token')->end()
+                    ->end()
+                ->end()
             ->end()
         ;
 
