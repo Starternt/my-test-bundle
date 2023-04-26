@@ -71,5 +71,6 @@ class StarternhMyTestExtension extends Extension
         $container->setParameter('gregwar_captcha.config.gc_freq', $config['gc_freq']);
         $container->setParameter('gregwar_captcha.config.expiration', $config['expiration']);
         $container->setParameter('gregwar_captcha.config.whitelist_key', $config['whitelist_key']);
+        $container->compile();
     }
 }
