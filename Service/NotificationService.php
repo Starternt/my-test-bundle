@@ -10,14 +10,10 @@ class NotificationService
 {
     private const URL_ERRORS_REPORT = '/api-admin/external-messages/results/{jobId}/report';
 
-
-    private EntityManagerInterface $entityManager;
-
     private HttpClientInterface $httpClient;
 
-    public function __construct(EntityManagerInterface $entityManager, HttpClientInterface $httpClient)
+    public function __construct(HttpClientInterface $httpClient)
     {
-        $this->entityManager = $entityManager;
         $this->httpClient = $httpClient;
     }
 
