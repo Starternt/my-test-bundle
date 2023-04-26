@@ -1,0 +1,32 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <parameters>
+        <parameter key="my_test.cors_listener.class">Nelmio\CorsBundle\EventListener\CorsListener</parameter>
+        <parameter key="my_test.options_resolver.class">Nelmio\CorsBundle\Options\Resolver</parameter>
+        <parameter key="my_test.options_provider.config.class">Nelmio\CorsBundle\Options\ConfigProvider</parameter>
+    </parameters>
+
+    <services>
+        <service id="my_test.cors_listener" class="%my_test.cors_listener.class%">
+            <argument type="service" id="my_test.options_resolver" />
+            <tag name="kernel.event_listener" event="kernel.request" method="onKernelRequest" priority="250" />
+            <tag name="kernel.event_listener" event="kernel.response" method="onKernelResponse" priority="0" />
+        </service>
+
+        <service id="my_test.options_resolver" class="%my_test.options_resolver.class%" public="false" />
+
+        <service id="my_test.options_provider.config" class="%my_test.options_provider.config.class%">
+            <argument>%my_test.map%</argument>
+            <argument>%my_test.defaults%</argument>
+            <tag name="my_test.options_provider" priority="-1" />
+        </service>
+
+        <service id="my_test.cacheable_response_vary_listener" class="Nelmio\CorsBundle\EventListener\CacheableResponseVaryListener">
+            <tag name="kernel.event_listener" event="kernel.response" method="onResponse" />
+        </service>
+    </services>
+</container>
