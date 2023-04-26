@@ -1,12 +1,5 @@
 <?php
-/*
- * This file is part of the NelmioCorsBundle.
- *
- * (c) Nelmio <hello@nelm.io>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+
 namespace Starternh\MyTestBundle\DependencyInjection\Compiler;
 
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
@@ -14,20 +7,20 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
 
 /**
- * Compiler pass for the nelmio_cors.configuration.provider tag.
+ * Compiler pass for the my_test.configuration.provider tag.
  */
 class CorsConfigurationProviderPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container): void
     {
-        if (!$container->hasDefinition('nelmio_cors.options_resolver')) {
+        if (!$container->hasDefinition('my_test.options_resolver')) {
             return;
         }
 
-        $resolverDefinition = $container->getDefinition('nelmio_cors.options_resolver');
+        $resolverDefinition = $container->getDefinition('my_test.options_resolver');
 
         $optionsProvidersByPriority = [];
-        foreach ($container->findTaggedServiceIds('nelmio_cors.options_provider') as $taggedServiceId => $tagAttributes) {
+        foreach ($container->findTaggedServiceIds('my_test.options_provider') as $taggedServiceId => $tagAttributes) {
             foreach ($tagAttributes as $attribute) {
                 $priority = isset($attribute['priority']) ? $attribute['priority'] : 0;
                 $optionsProvidersByPriority[$priority][] = new Reference($taggedServiceId);
