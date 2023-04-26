@@ -27,7 +27,7 @@ class StarternhMyTestExtension extends Extension
         $configuration = $this->getConfiguration($configs, $container);
         $config = $processor->processConfiguration($configuration, $configs);
 
-        $container->setParameter('starternh_my_test.config', $config);
+        $container->setParameter('my_test.config', $config);
     }
 
     /**
