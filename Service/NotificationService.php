@@ -1,9 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Starternh\MyTestBundle\Service;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Starternh\MyTestBundle\Dto\ExternalMessageInterface;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -34,11 +39,29 @@ class NotificationService
         $this->messagesCollection = new ArrayCollection();
     }
 
-    public function sendJson(ExternalMessageInterface $externalMessage): void
+    /**
+     * @throws TransportExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ClientExceptionInterface
+     */
+    public function sendJson(?string $systemName = null, ?string $globalType = null, ?string $globalChannel = null): void
     {
         try {
-            $url = str_replace('{{jobId}}', 123, self::URL_SEND_JSON);
-            $response = $this->httpClient->request('GET', $this->baseUrl.$url, [
+            $url = self::URL_SEND_JSON;
+            if (null !== $globalType) {
+                $url .= "/$globalType";
+            }
+
+            if (null !== $globalChannel) {
+                $url .= "/$globalChannel";
+            }
+
+            if (null !== $systemName) {
+                $url .= "?systemName=$systemName";
+            }
+
+            $response = $this->httpClient->request('POST', $url, [
                 'headers' => [
                     'token' => $this->token,
                     'Content-Type' => 'application/json'
@@ -48,11 +71,6 @@ class NotificationService
         } catch (\Exception $e) {
             dump($e->getMessage()); exit();
         }
-    }
-
-    public function addMessageToQueue(): self
-    {
-        return $this;
     }
 
     public function sendGzip(): void
@@ -71,7 +89,7 @@ class NotificationService
     public function getErrorsReport(int $jobId): void
     {
         try {
-            $url = str_replace('{{jobId}}', $jobId, self::URL_ERRORS_REPORT);
+            $url = str_replace('{{jobId}}', (string) $jobId, self::URL_ERRORS_REPORT);
             $response = $this->httpClient->request('GET', $this->baseUrl.$url, [
                 'headers' => [
                     'token' => $this->token,
@@ -87,5 +105,12 @@ class NotificationService
     public function getChannelsReport(int $jobId): void
     {
 
+    }
+
+    public function addMessageToQueue(ExternalMessageInterface $externalMessage): self
+    {
+        $this->messagesCollection->add($externalMessage);
+
+        return $this;
     }
 }
