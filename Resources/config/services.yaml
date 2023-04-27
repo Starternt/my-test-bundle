@@ -1,5 +1,5 @@
 services:
   Starternh\MyTestBundle\Service\NotificationService:
-    arguments: ['@doctrine.orm.entity_manager']
+    arguments: ['@http_client', '%my_test.config%']
 
 
