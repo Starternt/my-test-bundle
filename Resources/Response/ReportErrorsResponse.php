@@ -6,16 +6,30 @@ namespace Starternh\MyTestBundle\Resources\Response;
 
 class ReportErrorsResponse extends AbstractResponse
 {
-    public array $content = [];
+    public array $contentArray = [];
 
-    public function getContent(): array
+    public string $contentCsv = '';
+
+    public function getContentArray(): array
     {
-        return $this->content;
+        return $this->contentArray;
     }
 
-    public function setContent(array $content): self
+    public function setContentArray(array $contentArray): self
     {
-        $this->content = $content;
+        $this->contentArray = $contentArray;
+
+        return $this;
+    }
+
+    public function getContentCsv(): string
+    {
+        return $this->contentCsv;
+    }
+
+    public function setContentCsv(string $contentCsv): self
+    {
+        $this->contentCsv = $contentCsv;
 
         return $this;
     }

@@ -7,6 +7,8 @@ namespace Starternh\MyTestBundle\Service;
 use Doctrine\Common\Collections\ArrayCollection;
 use Starternh\MyTestBundle\Dto\ExternalMessageInterface;
 use Starternh\MyTestBundle\Resources\Response\ChannelReportResponse;
+use Starternh\MyTestBundle\Resources\Response\JobResponse;
+use Starternh\MyTestBundle\Resources\Response\JobResponseContent;
 use Starternh\MyTestBundle\Resources\Response\ReportErrorsResponse;
 use Starternh\MyTestBundle\Resources\Response\SendJsonResponse;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
@@ -36,20 +38,28 @@ class NotificationService
     public function __construct(HttpClientInterface $httpClient, $config)
     {
         $this->httpClient = $httpClient;
-        $this->baseUrl = $this->config['credentials']['base_url'] ?? '';
-        $this->token = $this->config['credentials']['token'] ?? '';
-        $this->config = (array) $config;
+        $this->baseUrl = $config['credentials']['base_url'] ?? '';
+        $this->token = $config['credentials']['token'] ?? '';
+        $this->config = (array)$config;
         $this->messagesCollection = new ArrayCollection();
     }
 
     /**
-     * @throws TransportExceptionInterface
-     * @throws ServerExceptionInterface
-     * @throws RedirectionExceptionInterface
+     * @param string|null $systemName Имя системы, в которую будет отправлено сообщение.
+     * @param string|null $globalType Если указан, перезапишет типы, указанные в сообщениях.
+     * @param string|null $globalChannel Если указан, перезапишет каналы, указанные в сообщениях.
+     *
+     * @return SendJsonResponse
      * @throws ClientExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
      */
-    public function sendJson(?string $systemName = null, ?string $globalType = null, ?string $globalChannel = null): SendJsonResponse
-    {
+    public function sendJson(
+        ?string $systemName = null,
+        ?string $globalType = null,
+        ?string $globalChannel = null
+    ): SendJsonResponse {
         $result = new SendJsonResponse();
         try {
             $url = self::URL_SEND_JSON;
@@ -73,10 +83,10 @@ class NotificationService
 
             $response = $this->httpClient->request('POST', $url, [
                 'headers' => [
-                    'token' => $this->token,
+                    'token'        => $this->token,
                     'Content-Type' => 'application/x-www-form-urlencoded',
                 ],
-                'body' => $content,
+                'body'    => $content,
             ]);
 
             $result->setStatusCode($response->getStatusCode());
@@ -110,26 +120,23 @@ class NotificationService
 
     }
 
-    public function getJobResults(): void
-    {
-
-    }
-
     /**
+     * @param int $jobId Идентификатор, полученный при отправке сообщений.
+     *
      * @throws RedirectionExceptionInterface
      * @throws ClientExceptionInterface
      * @throws TransportExceptionInterface
      * @throws ServerExceptionInterface
      */
-    public function getErrorsReport(int $jobId, string $contentType): ReportErrorsResponse
+    public function getJobResults(int $jobId): JobResponse
     {
-        $result = new ReportErrorsResponse();
+        $result = new JobResponse();
         try {
-            $url = str_replace('{{jobId}}', (string) $jobId, self::URL_ERRORS_REPORT);
+            $url = str_replace('{{jobId}}', (string)$jobId, self::URL_JOB_RESULTS);
             $response = $this->httpClient->request('GET', $this->baseUrl.$url, [
                 'headers' => [
-                    'token' => $this->token,
-                    'Content-Type' => $contentType,
+                    'token'        => $this->token,
+                    'Content-Type' => 'application/json',
                 ],
             ]);
 
@@ -140,7 +147,17 @@ class NotificationService
             if (isset($responseContent['success']) && true === $responseContent['success']) {
                 $result->setSuccess(true);
                 if (array_key_exists('data', $responseContent) && is_array($responseContent['data'])) {
-                    $result->setContent($responseContent['data']);
+                    $jobResponseContent = (new JobResponseContent())
+                        ->setId($responseContent['data']['id'] ?? null)
+                        ->setMessagesQuantity($responseContent['data']['messages_quantity'] ?? null)
+                        ->setSuccessfulMessagesQuantity($responseContent['successful_messages_quantity']['id'] ?? null)
+                        ->setErrorsQuantity($responseContent['data']['errors_quantity'] ?? null)
+                        ->setCompleted($responseContent['data']['completed'] ?? null)
+                        ->setEmailsFound($responseContent['data']['emails_found'] ?? null)
+                        ->setPhonesFound($responseContent['data']['phones_found'] ?? null)
+                        ->setDateCreated($responseContent['data']['date_created'] ?? null)
+                        ->setDateUpdated($responseContent['data']['date_updated'] ?? null);
+                    $result->setContent($jobResponseContent);
                 }
             } else {
                 $result->setSuccess(false);
@@ -153,34 +170,108 @@ class NotificationService
     }
 
     /**
-     * @throws RedirectionExceptionInterface
+     * @param int $jobId Идентификатор, полученный при отправке сообщений.
+     * @param bool $getResultAsCsv Если true, ответ будет в формате csv файла, иначе json.
+     *
+     * @return ReportErrorsResponse
      * @throws ClientExceptionInterface
-     * @throws TransportExceptionInterface
+     * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
      */
-    public function getChannelsReport(int $jobId): ChannelReportResponse
+    public function getErrorsReport(int $jobId, bool $getResultAsCsv = false): ReportErrorsResponse
     {
-        $result = new ChannelReportResponse();
+        $result = new ReportErrorsResponse();
         try {
-            $url = str_replace('{{jobId}}', (string) $jobId, self::URL_CHANNELS_REPORT);
+            $url = str_replace('{{jobId}}', (string)$jobId, self::URL_ERRORS_REPORT);
+            $headers = [
+                'token'        => $this->token,
+                'Content-Type' => 'application/json',
+            ];
+            if ($getResultAsCsv) {
+                $headers['Accept'] = 'text/csv';
+            }
+
             $response = $this->httpClient->request('GET', $this->baseUrl.$url, [
-                'headers' => [
-                    'token' => $this->token,
-                    'Content-Type' => 'application/json',
-                ],
+                'headers' => $headers,
             ]);
 
             $result->setStatusCode($response->getStatusCode());
             $result->setOriginalResponseBody($response->getContent());
 
-            $responseContent = json_decode($response->getContent(), true);
-            if (isset($responseContent['success']) && true === $responseContent['success']) {
-                $result->setSuccess(true);
-                if (array_key_exists('data', $responseContent) && is_array($responseContent['data'])) {
-                    $result->setContent($responseContent['data']);
+            if ($getResultAsCsv) {
+                if (200 === $response->getStatusCode()) {
+                    $result
+                        ->setSuccess(true)
+                        ->setContentCsv($response->getContent());
+                } else {
+                    $result->setSuccess(false);
                 }
             } else {
-                $result->setSuccess(false);
+                $responseContent = json_decode($response->getContent(), true);
+                if (isset($responseContent['success']) && true === $responseContent['success']) {
+                    $result->setSuccess(true);
+                    if (array_key_exists('data', $responseContent) && is_array($responseContent['data'])) {
+                        $result->setContentArray($responseContent['data']);
+                    }
+                } else {
+                    $result->setSuccess(false);
+                }
+            }
+
+            return $result;
+        } catch (\Exception $e) {
+            return $result->setOriginalResponseBody($e->getMessage());
+        }
+    }
+
+    /**
+     * @param int $jobId Идентификатор, полученный при отправке сообщений.
+     * @param bool $getResultAsCsv Если true, ответ будет в формате csv файла, иначе json.
+     *
+     * @throws RedirectionExceptionInterface
+     * @throws ClientExceptionInterface
+     * @throws TransportExceptionInterface
+     * @throws ServerExceptionInterface
+     */
+    public function getChannelsReport(int $jobId, bool $getResultAsCsv = false): ChannelReportResponse
+    {
+        $result = new ChannelReportResponse();
+        try {
+            $url = str_replace('{{jobId}}', (string)$jobId, self::URL_CHANNELS_REPORT);
+            $headers = [
+                'token'        => $this->token,
+                'Content-Type' => 'application/json',
+            ];
+            if ($getResultAsCsv) {
+                $headers['Accept'] = 'text/csv';
+            }
+
+            $response = $this->httpClient->request('GET', $this->baseUrl.$url, [
+                'headers' => $headers,
+            ]);
+
+            $result->setStatusCode($response->getStatusCode());
+            $result->setOriginalResponseBody($response->getContent());
+
+            if ($getResultAsCsv) {
+                if (200 === $response->getStatusCode()) {
+                    $result
+                        ->setSuccess(true)
+                        ->setContentCsv($response->getContent());
+                } else {
+                    $result->setSuccess(false);
+                }
+            } else {
+                $responseContent = json_decode($response->getContent(), true);
+                if (isset($responseContent['success']) && true === $responseContent['success']) {
+                    $result->setSuccess(true);
+                    if (array_key_exists('data', $responseContent) && is_array($responseContent['data'])) {
+                        $result->setContentArray($responseContent['data']);
+                    }
+                } else {
+                    $result->setSuccess(false);
+                }
             }
 
             return $result;
