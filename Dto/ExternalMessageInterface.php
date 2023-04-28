@@ -58,4 +58,6 @@ interface ExternalMessageInterface
     public function getChannelsPriority(): array;
 
     public function setChannelsPriority(array $channels): self;
+
+    public function toArray(): array;
 }

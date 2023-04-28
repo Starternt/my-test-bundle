@@ -19,4 +19,14 @@ abstract class ExternalMessageWithAccount extends ExternalMessage
 
         return $this;
     }
+
+    public function toArray(): array
+    {
+        $result = parent::toArray();
+        if (null !== $this->getAccount()) {
+            $result['account'] = $this->getAccount();
+        }
+
+        return $result;
+    }
 }

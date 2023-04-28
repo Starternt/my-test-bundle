@@ -9,7 +9,8 @@
     "symfony/config": "5.*",
     "symfony/dependency-injection": "5.*",
     "symfony/http-kernel": "5.*",
-    "symfony/http-client": "5.*"
+    "symfony/http-client": "5.*",
+    "ext-json": "*"
   },
   "autoload": {
     "psr-4": { "Starternh\\MyTestBundle\\": "" }

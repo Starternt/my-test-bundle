@@ -66,4 +66,26 @@ class DebtsMessage extends ExternalMessage
 
         return $this;
     }
+
+    public function toArray(): array
+    {
+        $result = parent::toArray();
+        if (null !== $this->getSaldoGas()) {
+            $result['saldoGas'] = $this->getSaldoGas();
+        }
+
+        if (null !== $this->getCreatedAt()) {
+            $result['createdAt'] = $this->getCreatedAt();
+        }
+
+        if (null !== $this->getFilialName()) {
+            $result['filialName'] = $this->getFilialName();
+        }
+
+        if (null !== $this->getFilialPhones()) {
+            $result['filialPhones'] = $this->getFilialPhones();
+        }
+
+        return $result;
+    }
 }

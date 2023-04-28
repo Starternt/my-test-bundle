@@ -75,4 +75,30 @@ final class FeedbackMessage extends ExternalMessageWithAccount
 
         return $this;
     }
+
+    public function toArray(): array
+    {
+        $result = parent::toArray();
+        if (null !== $this->getEmailSubject()) {
+            $result['emailSubject'] = $this->getEmailSubject();
+        }
+
+        if (null !== $this->getEmailContent()) {
+            $result['emailContent'] = $this->getEmailContent();
+        }
+
+        if (null !== $this->getPhoneContent()) {
+            $result['phoneContent'] = $this->getPhoneContent();
+        }
+
+        if (null !== $this->getOnlineSubject()) {
+            $result['onlineSubject'] = $this->getOnlineSubject();
+        }
+
+        if (null !== $this->getOnlineLink()) {
+            $result['onlineLink'] = $this->getOnlineLink();
+        }
+
+        return $result;
+    }
 }

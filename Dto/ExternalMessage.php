@@ -131,4 +131,46 @@ abstract class ExternalMessage implements ExternalMessageInterface
 
         return $this;
     }
+
+    public function toArray(): array
+    {
+        $result = [];
+        if (null !== $this->getContractNumber()) {
+            $result['contract'] = $this->getContractNumber();
+        }
+
+        if (null !== $this->getPhone()) {
+            $result['phone'] = $this->getPhone();
+        }
+
+        if (null !== $this->getEmail()) {
+            $result['email'] = $this->getEmail();
+        }
+
+        if (null !== $this->getTitle()) {
+            $result['title'] = $this->getTitle();
+        }
+
+        if (null !== $this->getText()) {
+            $result['text'] = $this->getText();
+        }
+
+        if (null !== $this->getChannel()) {
+            $result['channel'] = $this->getChannel();
+        }
+
+        if (null !== $this->getType()) {
+            $result['type'] = $this->getType();
+        }
+
+        if (null !== $this->getPriority()) {
+            $result['priority'] = $this->getPriority();
+        }
+
+        if (null !== $this->getChannelsPriority()) {
+            $result['channelsPriority'] = $this->getChannelsPriority();
+        }
+
+        return $result;
+    }
 }
