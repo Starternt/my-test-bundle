@@ -27,8 +27,6 @@ class NotificationService
 
     private HttpClientInterface $httpClient;
 
-    private array $config;
-
     private string $token;
 
     private string $baseUrl;
@@ -40,7 +38,6 @@ class NotificationService
         $this->httpClient = $httpClient;
         $this->baseUrl = $config['credentials']['base_url'] ?? '';
         $this->token = $config['credentials']['token'] ?? '';
-        $this->config = (array)$config;
         $this->messagesCollection = new ArrayCollection();
     }
 
