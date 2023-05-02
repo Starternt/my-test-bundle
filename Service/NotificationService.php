@@ -79,7 +79,7 @@ class NotificationService
                 $content[] = $externalMessage->toArray();
             }
 
-            $response = $this->httpClient->request('POST', $url, [
+            $response = $this->httpClient->request('POST', $this->baseUrl.$url, [
                 'headers' => [
                     'token'        => $this->token,
                     'Content-Type' => 'application/x-www-form-urlencoded',
@@ -147,7 +147,7 @@ class NotificationService
                 $url .= "?systemName=$systemName";
             }
 
-            $response = $this->httpClient->request('POST', $url, [
+            $response = $this->httpClient->request('POST', $this->baseUrl.$url, [
                 'headers' => [
                     'token' => $this->token,
                     'Content-Type' => 'application/gzip',
