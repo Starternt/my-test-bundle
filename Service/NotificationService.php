@@ -10,6 +10,7 @@ use Starternh\MyTestBundle\Resources\Response\ChannelReportResponse;
 use Starternh\MyTestBundle\Resources\Response\JobResponse;
 use Starternh\MyTestBundle\Resources\Response\JobResponseContent;
 use Starternh\MyTestBundle\Resources\Response\ReportErrorsResponse;
+use Starternh\MyTestBundle\Resources\Response\SendGzipResponse;
 use Starternh\MyTestBundle\Resources\Response\SendJsonResponse;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
@@ -112,9 +113,72 @@ class NotificationService
         }
     }
 
-    public function sendGzip(): void
+    /**
+     * @param string $pathToFile Путь к архиву с данными.
+     * @param string|null $systemName Имя системы, в которую будет отправлено сообщение.
+     * @param string|null $globalType Если указан, перезапишет типы, указанные в сообщениях.
+     * @param string|null $globalChannel Если указан, перезапишет каналы, указанные в сообщениях.
+     *
+     * @return SendGzipResponse
+     * @throws ClientExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
+     */
+    public function sendGzip(
+        string  $pathToFile,
+        ?string $systemName = null,
+        ?string $globalType = null,
+        ?string $globalChannel = null
+    ): SendGzipResponse
     {
+        $result = new SendGzipResponse();
+        try {
+            $url = self::URL_SEND_GZIP;
+            if (null !== $globalType) {
+                $url .= "/$globalType";
+            }
 
+            if (null !== $globalChannel) {
+                $url .= "/$globalChannel";
+            }
+
+            if (null !== $systemName) {
+                $url .= "?systemName=$systemName";
+            }
+
+            $response = $this->httpClient->request('POST', $url, [
+                'headers' => [
+                    'token' => $this->token,
+                    'Content-Type' => 'application/gzip',
+                ],
+                'body' => fopen($pathToFile, 'r'),
+            ]);
+
+            $result->setStatusCode($response->getStatusCode());
+            $result->setOriginalResponseBody($response->getContent());
+
+            $responseContent = json_decode($response->getContent(), true);
+            if (isset($responseContent['success']) && true === $responseContent['success']
+                && array_key_exists(
+                    'data',
+                    $responseContent
+                )
+                && array_key_exists('jobId', $responseContent)
+            ) {
+                $result
+                    ->setSuccess(true)
+                    ->setJobId((int)$responseContent['data']['jobId']);
+            } else {
+                $result->setSuccess(false);
+            }
+
+            $this->messagesCollection->clear();
+
+            return $result;
+        } catch (\Exception $e) {
+            return $result->setOriginalResponseBody($e->getMessage());
+        }
     }
 
     /**
