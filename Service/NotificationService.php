@@ -96,7 +96,7 @@ class NotificationService
                     'data',
                     $responseContent
                 )
-                && array_key_exists('jobId', $responseContent)
+                && array_key_exists('jobId', $responseContent['data'])
             ) {
                 $result
                     ->setSuccess(true)
@@ -164,7 +164,7 @@ class NotificationService
                     'data',
                     $responseContent
                 )
-                && array_key_exists('jobId', $responseContent)
+                && array_key_exists('jobId', $responseContent['data'])
             ) {
                 $result
                     ->setSuccess(true)
